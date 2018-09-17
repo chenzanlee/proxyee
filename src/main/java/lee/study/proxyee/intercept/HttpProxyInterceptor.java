@@ -5,14 +5,14 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
-public class HttpProxyIntercept {
+public class HttpProxyInterceptor {
 
   /**
    * 拦截代理服务器到目标服务器的请求头
    */
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
       HttpProxyInterceptPipeline pipeline) throws Exception {
-    pipeline.beforeRequest(clientChannel, httpRequest);
+    pipeline.beforeRequest(clientChannel, httpRequest);//委托给pipeline来处理
   }
 
   /**
