@@ -4,23 +4,27 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import lee.study.proxyee.crt.CertUtil;
-import lee.study.proxyee.exception.HttpProxyExceptionHandle;
-import lee.study.proxyee.handler.HttpProxyServerHandle;
-import lee.study.proxyee.intercept.CertDownIntercept;
-import lee.study.proxyee.intercept.HttpProxyIntercept;
+import lee.study.proxyee.exception.HttpProxyExceptionHandler;
+import lee.study.proxyee.handler.HttpProxyServerHandler;
+import lee.study.proxyee.intercept.CertDownInterceptor;
+import lee.study.proxyee.intercept.HttpProxyInterceptor;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.intercept.HttpProxyInterceptPipeline;
 import lee.study.proxyee.proxy.ProxyConfig;
@@ -34,7 +38,7 @@ public class HttpProxyServer {
   private HttpProxyCACertFactory caCertFactory;
   private HttpProxyServerConfig serverConfig;
   private HttpProxyInterceptInitializer proxyInterceptInitializer;
-  private HttpProxyExceptionHandle httpProxyExceptionHandle;
+  private HttpProxyExceptionHandler httpProxyExceptionHandler;
   private ProxyConfig proxyConfig;
 
   private EventLoopGroup bossGroup;
@@ -89,8 +93,8 @@ public class HttpProxyServer {
     if (proxyInterceptInitializer == null) {
       proxyInterceptInitializer = new HttpProxyInterceptInitializer();
     }
-    if (httpProxyExceptionHandle == null) {
-      httpProxyExceptionHandle = new HttpProxyExceptionHandle();
+    if (httpProxyExceptionHandler == null) {
+      httpProxyExceptionHandler = new HttpProxyExceptionHandler();
     }
   }
 
@@ -105,9 +109,9 @@ public class HttpProxyServer {
     return this;
   }
 
-  public HttpProxyServer httpProxyExceptionHandle(
-      HttpProxyExceptionHandle httpProxyExceptionHandle) {
-    this.httpProxyExceptionHandle = httpProxyExceptionHandle;
+  public HttpProxyServer httpProxyExceptionHandler(
+      HttpProxyExceptionHandler httpProxyExceptionHandler) {
+    this.httpProxyExceptionHandler = httpProxyExceptionHandler;
     return this;
   }
 
@@ -123,18 +127,19 @@ public class HttpProxyServer {
       ServerBootstrap b = new ServerBootstrap();
       b.group(bossGroup, workerGroup)
           .channel(NioServerSocketChannel.class)
-//          .option(ChannelOption.SO_BACKLOG, 100)
-//          .handler(new LoggingHandler(LogLevel.DEBUG))
+          .option(ChannelOption.SO_BACKLOG, 100)
+          .handler(new LoggingHandler(LogLevel.DEBUG))
           .childHandler(new ChannelInitializer<Channel>() {
 
             @Override
             protected void initChannel(Channel ch) throws Exception {
               ch.pipeline().addLast("httpCodec", new HttpServerCodec());
-              ch.pipeline().addLast("serverHandle",
-                  new HttpProxyServerHandle(serverConfig, proxyInterceptInitializer, proxyConfig,
-                      httpProxyExceptionHandle));
+              ch.pipeline().addLast("serverHandler",
+                  new HttpProxyServerHandler(serverConfig, proxyInterceptInitializer, proxyConfig,
+                      httpProxyExceptionHandler));
             }
           });
+      
       ChannelFuture f = b
           .bind(port)
           .sync();
@@ -160,14 +165,14 @@ public class HttpProxyServer {
         .proxyInterceptInitializer(new HttpProxyInterceptInitializer() {
           @Override
           public void init(HttpProxyInterceptPipeline pipeline) {
-            pipeline.addLast(new CertDownIntercept());  //处理证书下载
-            pipeline.addLast(new HttpProxyIntercept() {
+            pipeline.addLast(new CertDownInterceptor());  //处理证书下载
+            pipeline.addLast(new HttpProxyInterceptor() {
               @Override
               public void beforeRequest(Channel clientChannel, HttpRequest httpRequest,
                   HttpProxyInterceptPipeline pipeline) throws Exception {
                 //替换UA，伪装成手机浏览器
-                /*httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");*/
+                httpRequest.headers().set(HttpHeaderNames.USER_AGENT,
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
                 //转到下一个拦截器处理
                 pipeline.beforeRequest(clientChannel, httpRequest);
               }
@@ -184,7 +189,7 @@ public class HttpProxyServer {
             });
           }
         })
-        .httpProxyExceptionHandle(new HttpProxyExceptionHandle() {
+        .httpProxyExceptionHandler(new HttpProxyExceptionHandler() {
           @Override
           public void beforeCatch(Channel clientChannel, Throwable cause) throws Exception {
             System.out.println("111111111111111");

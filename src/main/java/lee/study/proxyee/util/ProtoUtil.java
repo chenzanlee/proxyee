@@ -1,13 +1,17 @@
 package lee.study.proxyee.util;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpRequest;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpRequest;
+/**
+ * 从http请求对象中获取主机，端口号及是否是ssl加密传输方式这三个信息，封装成requestProto对象返回；
+ * @author Mr.lee
+ *
+ */
 public class ProtoUtil {
 
   public static RequestProto getRequestProto(HttpRequest httpRequest) throws MalformedURLException {
@@ -31,7 +35,7 @@ public class ProtoUtil {
     if (matcher.find()) {
       requestProto.setHost(matcher.group("host"));
       portTemp = matcher.group("port");
-      if (portTemp == null) {
+      if (portTemp == null) {//主机字符串上没取到端口号
         matcher = pattern.matcher(uriStr);
         if (matcher.find()) {
           portTemp = matcher.group("port");
@@ -53,7 +57,11 @@ public class ProtoUtil {
     requestProto.setSsl(isSsl);
     return requestProto;
   }
-
+/**
+ * 主机，端口，是否加密
+ * @author Mr.lee
+ *
+ */
   public static class RequestProto implements Serializable {
 
     private static final long serialVersionUID = -6471051659605127698L;
@@ -86,7 +94,7 @@ public class ProtoUtil {
       this.port = port;
     }
 
-    public boolean getSsl() {
+    public boolean isSsl() {
       return ssl;
     }
 

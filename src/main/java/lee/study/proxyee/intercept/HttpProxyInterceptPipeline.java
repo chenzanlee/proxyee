@@ -9,15 +9,15 @@ import java.util.LinkedList;
 import java.util.List;
 import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
-public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> {
+public class HttpProxyInterceptPipeline implements Iterable<HttpProxyInterceptor> {
 
-  private List<HttpProxyIntercept> intercepts;
-  private HttpProxyIntercept defaultIntercept;
+  private List<HttpProxyInterceptor> intercepts;
+  private HttpProxyInterceptor defaultIntercept;
 
-  private int pos1 = 0;
-  private int pos2 = 0;
-  private int pos3 = 0;
-  private int pos4 = 0;
+  private int pos1 = 0;//处理请求头
+  private int pos2 = 0;//处理请求体
+  private int pos3 = 0;//处理响应头
+  private int pos4 = 0;//处理响应体
 
   private RequestProto requestProto;
   private HttpRequest httpRequest;
@@ -47,63 +47,66 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
     this.requestProto = requestProto;
   }
 
-  public HttpProxyInterceptPipeline(HttpProxyIntercept defaultIntercept) {
+  public HttpProxyInterceptPipeline(HttpProxyInterceptor defaultIntercept) {
     this.intercepts = new LinkedList<>();
     this.defaultIntercept = defaultIntercept;
     this.intercepts.add(defaultIntercept);
   }
 
-  public void addLast(HttpProxyIntercept intercept) {
+  public void addLast(HttpProxyInterceptor intercept) {
     this.intercepts.add(this.intercepts.size() - 1, intercept);
   }
 
-  public void addFirst(HttpProxyIntercept intercept) {
+  public void addFirst(HttpProxyInterceptor intercept) {
     this.intercepts.add(0, intercept);
   }
 
-  public HttpProxyIntercept get(int index) {
+  public HttpProxyInterceptor get(int index) {
     return this.intercepts.get(index);
   }
 
-  public HttpProxyIntercept getDefault() {
+  public HttpProxyInterceptor getDefault() {
     return this.defaultIntercept;
   }
-
+ //处理请求头
   public void beforeRequest(Channel clientChannel, HttpRequest httpRequest) throws Exception {
-    if (this.pos1 == 0) {
+    if (this.pos1 == 0) {//初始化请求
       this.httpRequest = httpRequest;
     }
     if (this.pos1 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos1++);
+      HttpProxyInterceptor intercept = intercepts.get(this.pos1++);
       intercept.beforeRequest(clientChannel, this.httpRequest, this);
     }
     this.pos1 = 0;
   }
 
+  //处理请求体
   public void beforeRequest(Channel clientChannel, HttpContent httpContent) throws Exception {
     if (this.pos2 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos2++);
+      HttpProxyInterceptor intercept = intercepts.get(this.pos2++);
       intercept.beforeRequest(clientChannel, httpContent, this);
     }
     this.pos2 = 0;
   }
-
+  
+  //处理响应头
   public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpResponse httpResponse)
       throws Exception {
     if (this.pos3 == 0) {
       this.httpResponse = httpResponse;
     }
     if (this.pos3 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos3++);
+      HttpProxyInterceptor intercept = intercepts.get(this.pos3++);
       intercept.afterResponse(clientChannel, proxyChannel, this.httpResponse, this);
     }
     this.pos3 = 0;
   }
 
+  //处理响应体
   public void afterResponse(Channel clientChannel, Channel proxyChannel, HttpContent httpContent)
       throws Exception {
     if (this.pos4 < intercepts.size()) {
-      HttpProxyIntercept intercept = intercepts.get(this.pos4++);
+      HttpProxyInterceptor intercept = intercepts.get(this.pos4++);
       intercept.afterResponse(clientChannel, proxyChannel, httpContent, this);
     }
     this.pos4 = 0;
@@ -158,7 +161,7 @@ public class HttpProxyInterceptPipeline implements Iterable<HttpProxyIntercept> 
   }
 
   @Override
-  public Iterator<HttpProxyIntercept> iterator() {
+  public Iterator<HttpProxyInterceptor> iterator() {
     return intercepts.iterator();
   }
 }

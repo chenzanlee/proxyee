@@ -1,7 +1,11 @@
 package lee.study.proxyee.proxy;
 
 import java.io.Serializable;
-
+/**
+ * 代理配置
+ * @author Mr.lee
+ *
+ */
 public class ProxyConfig implements Serializable {
 
   private static final long serialVersionUID = 1531104384359036231L;
@@ -79,14 +83,14 @@ public class ProxyConfig implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
+    if (this == o) {//o指向的是当前对象实例
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (o == null || getClass() != o.getClass()) {//o为空，或者o不是当前类的实例
       return false;
     }
 
-    ProxyConfig config = (ProxyConfig) o;
+    ProxyConfig config = (ProxyConfig) o;//o不为空且o为当前类的实例，故向下转型为当前类的实例，从而比较各个实例属性是否一致
 
     if (port != config.port) {
       return false;

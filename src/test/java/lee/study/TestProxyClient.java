@@ -35,7 +35,7 @@ public class TestProxyClient {
             ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
               @Override
               public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                System.out.println(msg.toString());
+                System.out.println("received: "+msg.toString());
               }
             });
           }

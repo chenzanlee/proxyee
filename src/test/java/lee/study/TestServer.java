@@ -24,7 +24,7 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import lee.study.proxyee.crt.CertPool;
 import lee.study.proxyee.crt.CertUtil;
-import lee.study.proxyee.exception.HttpProxyExceptionHandle;
+import lee.study.proxyee.exception.HttpProxyExceptionHandler;
 import lee.study.proxyee.intercept.HttpProxyInterceptInitializer;
 import lee.study.proxyee.server.HttpProxyServerConfig;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

@@ -1,11 +1,17 @@
 package lee.study;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpServerCodec;
-import lee.study.proxyee.handler.HttpProxyServerHandle;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 public class TestClose {
 
@@ -18,7 +24,7 @@ public class TestClose {
           .channel(NioServerSocketChannel.class)
           .option(ChannelOption.SO_BACKLOG, 100)
           .option(ChannelOption.TCP_NODELAY, true)
-//                    .handler(new LoggingHandler(LogLevel.ERROR))
+                    .handler(new LoggingHandler(LogLevel.ERROR))
           .childHandler(new ChannelInitializer<Channel>() {
 
             @Override

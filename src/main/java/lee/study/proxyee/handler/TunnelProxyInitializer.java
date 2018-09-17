@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.proxy.ProxyHandler;
-import lee.study.proxyee.exception.HttpProxyExceptionHandle;
+import lee.study.proxyee.exception.HttpProxyExceptionHandler;
 
 /**
  * http代理隧道，转发原始报文
@@ -42,8 +42,8 @@ public class TunnelProxyInitializer extends ChannelInitializer {
       public void exceptionCaught(ChannelHandlerContext ctx0, Throwable cause) throws Exception {
         ctx0.channel().close();
         clientChannel.close();
-        HttpProxyExceptionHandle exceptionHandle = ((HttpProxyServerHandle) clientChannel.pipeline()
-            .get("serverHandle")).getExceptionHandle();
+        HttpProxyExceptionHandler exceptionHandle = ((HttpProxyServerHandler) clientChannel.pipeline()
+            .get("serverHandle")).getExceptionHandler();
         exceptionHandle.afterCatch(clientChannel,ctx0.channel(),cause);
       }
     });

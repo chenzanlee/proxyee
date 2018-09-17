@@ -4,8 +4,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.proxy.ProxyHandler;
-import lee.study.proxyee.server.HttpProxyServer;
-import lee.study.proxyee.util.ProtoUtil;
 import lee.study.proxyee.util.ProtoUtil.RequestProto;
 
 /**
@@ -29,13 +27,13 @@ public class HttpProxyInitializer extends ChannelInitializer {
     if (proxyHandler != null) {
       ch.pipeline().addLast(proxyHandler);
     }
-    if (requestProto.getSsl()) {
+    if (requestProto.isSsl()) {
       ch.pipeline().addLast(
-          ((HttpProxyServerHandle) clientChannel.pipeline().get("serverHandle")).getServerConfig()
+          ((HttpProxyServerHandler) clientChannel.pipeline().get("serverHandler")).getServerConfig()
               .getClientSslCtx()
               .newHandler(ch.alloc(), requestProto.getHost(), requestProto.getPort()));
     }
     ch.pipeline().addLast("httpCodec", new HttpClientCodec());
-    ch.pipeline().addLast("proxyClientHandle", new HttpProxyClientHandle(clientChannel));
+    ch.pipeline().addLast("proxyClientHandler", new HttpProxyClientHandler(clientChannel));
   }
 }
