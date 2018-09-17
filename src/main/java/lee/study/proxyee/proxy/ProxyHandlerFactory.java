@@ -6,7 +6,7 @@ import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
 import java.net.InetSocketAddress;
 
-public class ProxyHandleFactory {
+public class ProxyHandlerFactory {
 
   public static ProxyHandler build(ProxyConfig config) {
     ProxyHandler proxyHandler = null;
