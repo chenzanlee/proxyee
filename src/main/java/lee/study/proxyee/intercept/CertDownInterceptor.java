@@ -18,7 +18,7 @@ import lee.study.proxyee.util.ProtoUtil.RequestProto;
 /**
  * 处理证书下载页面 http://proxyServerIp:proxyServerPort
  */
-public class CertDownIntercept extends HttpProxyIntercept {
+public class CertDownInterceptor extends HttpProxyInterceptor {
 
   private boolean crtFlag = false;
 
