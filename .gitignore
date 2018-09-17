@@ -1,4 +1,10 @@
-﻿*.class
+﻿#
+.gitignore
+.settings
+.classpath
+.project
+
+*.class
 
 # BlueJ files
 *.ctxt
